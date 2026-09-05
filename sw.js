@@ -1,6 +1,6 @@
 // Cache the whole app on first visit so it keeps answering underground, on the
 // Red Line, or with no signal at all. Bump CACHE when the data is rebuilt.
-const CACHE = "chicago-neighborhoods-v1";
+const CACHE = "chicago-neighborhoods-v2";
 const ASSETS = [
   "./",
   "index.html",

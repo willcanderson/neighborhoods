@@ -7,6 +7,13 @@ window.NeighborhoodMap = (function () {
   const MIN_SCALE = 700;     // pixels per degree of latitude (whole city, zoomed out)
   const MAX_SCALE = 400000;  // roughly a city block across
 
+  // Street names on the boundary lines appear once a neighborhood roughly fills
+  // the view. Past that the per-label check - a name is only drawn when the
+  // stretch it names is longer on screen than the text itself - does the rest
+  // of the thinning, so long arterials show up first and side streets follow
+  // as you zoom further in.
+  const STREET_LABEL_SCALE = 6000;
+
   function hash(text) {
     let h = 0;
     for (let i = 0; i < text.length; i++) h = (h * 31 + text.charCodeAt(i)) | 0;
@@ -18,12 +25,17 @@ window.NeighborhoodMap = (function () {
     const ctx = canvas.getContext("2d");
     const view = { lon: -87.6298, lat: 41.8781, scale: 9000 };
     let features = [];
+    let borders = [];      // street labels sitting on the boundary lines
+    let streetNames = [];
     let activeName = null;
     let marker = null; // {lon, lat, accuracy}
     let probe = null;  // {lon, lat}
     let width = 0;
     let height = 0;
     let theme = readTheme();
+    // Text widths for the street labels. The font never changes, so measuring
+    // each name once keeps panning cheap even with a thousand labels in play.
+    const textWidths = new Map();
 
     function readTheme() {
       const css = getComputedStyle(document.documentElement);
@@ -36,6 +48,7 @@ window.NeighborhoodMap = (function () {
         activeFill: get("--map-active-fill", "#2f6f8f"),
         activeLine: get("--map-active-line", "#7fd3ff"),
         label: get("--map-label", "#dce6f0"),
+        street: get("--map-street", "#9fb3c6"),
         labelHalo: get("--map-label-halo", "#0b1219"),
         marker: get("--map-marker", "#ffd166"),
         markerFill: get("--map-marker-fill", "rgba(255, 209, 102, 0.16)"),
@@ -131,6 +144,7 @@ window.NeighborhoodMap = (function () {
         ctx.stroke();
       }
 
+      drawStreetLabels();
       drawLabels(shown);
       if (probe) drawProbe(probe);
       if (marker) drawMarker(marker);
@@ -179,6 +193,70 @@ window.NeighborhoodMap = (function () {
       }
     }
 
+    // Street names drawn along the boundary they follow. Each label carries the
+    // length of the stretch it names, so a name is only drawn when that stretch
+    // is actually long enough on screen to read it against.
+    function drawStreetLabels() {
+      if (view.scale < STREET_LABEL_SCALE || !borders.length) return;
+      // Seeded with the on-screen controls, as for the neighborhood labels.
+      const placed = [[width - 58, 0, width, 210]];
+      // Where each street name has already been drawn, so a long arterial
+      // repeats along its length without crowding itself.
+      const drawnAt = new Map();
+      const REPEAT_GAP = 240;
+      ctx.font = "600 11px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.lineJoin = "round";
+      for (const label of borders) {
+        const p = project(label.x, label.y);
+        if (p[0] < 0 || p[0] > width || p[1] < 0 || p[1] > height) continue;
+        const runPx = (label.l / Geo.M_PER_DEG_LAT) * view.scale;
+        if (runPx < 60) continue;
+        const name = streetNames[label.n];
+        if (!name) continue;
+        let textWidth = textWidths.get(name);
+        if (textWidth === undefined) {
+          textWidth = ctx.measureText(name).width;
+          textWidths.set(name, textWidth);
+        }
+        if (runPx < textWidth + 24) continue;
+
+        const radians = (label.a * Math.PI) / 180;
+        const halfX = Math.abs(Math.cos(radians)) * (textWidth / 2) + 5;
+        const halfY = Math.abs(Math.sin(radians)) * (textWidth / 2) + 7;
+        const box = [p[0] - halfX, p[1] - halfY, p[0] + halfX, p[1] + halfY];
+        // Never let a name run off the edge half-drawn - a clipped street name
+        // is worse than no name at all.
+        if (box[0] < 2 || box[2] > width - 2 || box[1] < 2 || box[3] > height - 2) {
+          continue;
+        }
+        const clash = placed.some(
+          (q) => !(box[2] < q[0] || box[0] > q[2] || box[3] < q[1] || box[1] > q[3])
+        );
+        if (clash) continue;
+        const previous = drawnAt.get(name);
+        if (previous && Math.hypot(previous[0] - p[0], previous[1] - p[1]) < REPEAT_GAP) {
+          continue;
+        }
+        placed.push(box);
+        drawnAt.set(name, p);
+
+        ctx.save();
+        ctx.translate(p[0], p[1]);
+        ctx.rotate(radians);
+        // The halo doubles as a mask, so the name reads as sitting in a gap in
+        // the boundary line rather than on top of it.
+        ctx.strokeStyle = theme.labelHalo;
+        ctx.lineWidth = 4;
+        ctx.strokeText(name, 0, 0);
+        ctx.fillStyle = theme.street;
+        ctx.fillText(name, 0, 0);
+        ctx.restore();
+      }
+      ctx.textBaseline = "alphabetic";
+    }
+
     function drawMarker(m) {
       const p = project(m.lon, m.lat);
       if (m.accuracy) {
@@ -216,6 +294,12 @@ window.NeighborhoodMap = (function () {
 
     function setFeatures(list) {
       features = list;
+      draw();
+    }
+
+    function setBorders(list, names) {
+      borders = list || [];
+      streetNames = names || [];
       draw();
     }
 
@@ -354,6 +438,7 @@ window.NeighborhoodMap = (function () {
       resize: resize,
       draw: draw,
       setFeatures: setFeatures,
+      setBorders: setBorders,
       setActive: setActive,
       setMarker: setMarker,
       setProbe: setProbe,
