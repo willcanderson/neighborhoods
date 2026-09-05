@@ -39,8 +39,17 @@ which makes the app work with no signal at all after the first visit.
 
 ### Deploying
 
-Everything is static. Push the repository to GitHub Pages, Netlify, S3, or any
-web host and it works as-is — there's nothing to build or configure.
+Everything is static, so any web host works — Netlify, S3, a directory on a box
+you already own.
+
+This repository ships a GitHub Pages workflow
+(`.github/workflows/pages.yml`): every push to `main` publishes the repository
+root as-is. It needs one manual step first, which only a repository admin can
+do — **Settings → Pages → Source: "GitHub Actions"**. Until that is set, the
+workflow will fail at the deploy step.
+
+Every path in the page is relative, so it works from a project subpath
+(`https://<user>.github.io/neighborhoods/`) as well as from a domain root.
 
 ## How it works
 
