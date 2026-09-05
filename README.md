@@ -21,6 +21,10 @@ Then:
 - **Tap the map** — checks any spot you point at, no GPS needed.
 - **Search** — jumps to a neighborhood, including local names that aren't on the
   official map ("Pilsen", "Bronzeville", "K-Town", "Back of the Yards").
+- **Zoom in** — once a neighborhood roughly fills the view, the boundary lines
+  label themselves with the street they follow: Logan Square turns out to be
+  Diversey, Western, Bloomingdale and Pulaski. That is the fastest way to learn
+  a border, because you already know the streets.
 - **Neighborhoods / Community areas** — switches which of the two boundary sets
   the map draws. The answer card always names both.
 
@@ -67,6 +71,15 @@ Every path in the page is relative, so it works from a project subpath
 - `js/aliases.js` — a hand-written table of local names that don't have their
   own polygon in the city's files.
 
+Border street names are matched at build time, not in the browser: each
+boundary segment is tested against the city's street centerlines, and a segment
+that runs within 35 m of a roughly parallel street takes its name. Consecutive
+segments on the same street are merged into one stretch, which gets a label at
+its midpoint and every 700 m along its length. Only the resulting labels ship —
+about 1,800 of them, in place of 87 MB of street geometry. A boundary that
+follows no street, like a rail embankment, stays unlabelled rather than being
+given a name it doesn't have.
+
 ## The data
 
 Both layers come from the [City of Chicago open data
@@ -76,6 +89,7 @@ portal](https://data.cityofchicago.org):
 | --- | --- | --- |
 | Neighborhoods | 98 | The names people actually use — Wrigleyville, Bucktown, Andersonville. |
 | Community areas | 77 | The city's official statistical geography, fixed since the 1920s. |
+| Street centerlines | 56,321 | Used at build time only, to name the streets the boundaries follow. |
 
 Polygons are simplified to about two metres, which is finer than a phone's GPS
 fix and takes the bundle from 3.3 MB to 230 KB.
@@ -88,7 +102,8 @@ python3 tools/build_data.py
 
 It downloads from the data portal, falls back to public mirrors of the same
 files, caches the raw downloads in `.cache/`, and rewrites
-`data/boundaries.js`.
+`data/boundaries.js`. The street centerline file is an 87 MB download; pass
+`--no-streets` to skip it and build the boundaries alone.
 
 ## Caveats worth knowing
 

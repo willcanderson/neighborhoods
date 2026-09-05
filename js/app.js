@@ -27,6 +27,7 @@
 
   const map = NeighborhoodMap.create(canvas, { onTap: onMapTap });
   map.setFeatures(data.layers[layerKey].features);
+  map.setBorders(data.layers[layerKey].borders, data.streets);
   fitWholeCity();
 
   // --- rendering ---------------------------------------------------------
@@ -266,6 +267,7 @@
     if (key === layerKey) return;
     layerKey = key;
     map.setFeatures(data.layers[key].features);
+    map.setBorders(data.layers[key].borders, data.streets);
     for (const button of document.querySelectorAll(".segmented button")) {
       button.setAttribute(
         "aria-pressed",

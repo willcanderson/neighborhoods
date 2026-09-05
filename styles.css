@@ -18,6 +18,7 @@
   --map-active-fill: #24596f;
   --map-active-line: #7fd3ff;
   --map-label: #c9d8e6;
+  --map-street: #93aec6;
   --map-label-halo: #080e14;
   --map-marker: #ffd166;
   --map-marker-fill: rgba(255, 209, 102, 0.16);
@@ -45,6 +46,7 @@
     --map-active-fill: #9fd8f2;
     --map-active-line: #0d6f9c;
     --map-label: #26394a;
+    --map-street: #4c687f;
     --map-label-halo: #ffffff;
     --map-marker: #e8590c;
     --map-marker-fill: rgba(232, 89, 12, 0.14);
