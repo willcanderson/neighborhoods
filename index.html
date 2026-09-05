@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>What Chicago neighborhood am I in?</title>
+    <meta
+      name="description"
+      content="Point-in-polygon lookup of Chicago's 98 neighborhoods and 77 community areas, entirely in the browser."
+    />
+    <meta name="theme-color" content="#0b1219" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="assets/icon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>What neighborhood am I in?</h1>
+      <button id="locate" class="primary" type="button">Locate me</button>
+    </header>
+
+    <noscript>
+      <p style="padding: 0 16px">
+        This page needs JavaScript: the boundary lookup runs entirely in your
+        browser, so there is no server to fall back on.
+      </p>
+    </noscript>
+
+    <main>
+      <section id="answer" class="answer" aria-live="polite">
+        <p class="eyebrow">Chicago neighborhood finder</p>
+        <h2 class="headline">Tap &ldquo;Locate me&rdquo;</h2>
+        <p class="detail">
+          Everything runs in your browser &mdash; your location is never sent anywhere.
+        </p>
+      </section>
+
+      <div class="toolbar">
+        <button id="follow" class="toggle" type="button" aria-pressed="false">
+          Follow me
+        </button>
+        <div class="segmented" role="group" aria-label="Map layer">
+          <button type="button" data-layer="neighborhood" aria-pressed="true">
+            Neighborhoods
+          </button>
+          <button type="button" data-layer="community" aria-pressed="false">
+            Community areas
+          </button>
+        </div>
+      </div>
+
+      <div class="map-wrap">
+        <canvas id="map" aria-label="Map of Chicago neighborhood boundaries"></canvas>
+        <div class="map-controls">
+          <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+          <button id="zoom-out" type="button" aria-label="Zoom out">&minus;</button>
+          <button id="recenter" type="button" aria-label="Back to my location">&#9678;</button>
+          <button id="whole-city" type="button" aria-label="Whole city">&#9723;</button>
+        </div>
+        <p class="map-hint">Drag to pan, pinch or scroll to zoom, tap anywhere to check that spot.</p>
+      </div>
+
+      <section class="browse">
+        <label class="visually-hidden" for="search">Search neighborhoods</label>
+        <input
+          id="search"
+          type="search"
+          autocomplete="off"
+          placeholder="Look up a neighborhood (try &ldquo;Pilsen&rdquo;)"
+        />
+        <ul id="results" class="results"></ul>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Boundaries from the City of Chicago open data portal: 98 neighborhoods and
+        77 official community areas, simplified to about two metres. No server, no
+        tracking, no network calls after the page loads.
+      </p>
+    </footer>
+
+    <script src="data/boundaries.js"></script>
+    <script src="js/aliases.js"></script>
+    <script src="js/geometry.js"></script>
+    <script src="js/locator.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

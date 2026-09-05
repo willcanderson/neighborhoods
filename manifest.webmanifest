@@ -1,0 +1,19 @@
+{
+  "name": "What Chicago neighborhood am I in?",
+  "short_name": "Neighborhood",
+  "description": "Looks up which Chicago neighborhood and community area you are standing in, entirely on your device.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1219",
+  "theme_color": "#0b1219",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    }
+  ]
+}
