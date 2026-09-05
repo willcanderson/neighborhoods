@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Neighborhood locator">
+  <rect width="192" height="192" rx="36" fill="#0b1219"/>
+  <g fill="none" stroke="#374b5e" stroke-width="5" stroke-linejoin="round">
+    <path d="M32 34h56v50H32z"/>
+    <path d="M88 34h72v34H88z"/>
+    <path d="M88 68h72v46H88z"/>
+    <path d="M32 84h56v74H32z"/>
+    <path d="M88 114h72v44H88z"/>
+  </g>
+  <circle cx="96" cy="96" r="30" fill="#7fd3ff" opacity="0.18"/>
+  <circle cx="96" cy="96" r="12" fill="#ffd166" stroke="#0b1219" stroke-width="5"/>
+</svg>
